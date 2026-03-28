@@ -64,7 +64,16 @@ async function connectDb() {
   catch { return false; }
 }
 
-app.get('/health', (req, res) => res.json({ status: 'ok', db: ordersCollection ? 'connected' : 'disconnected' }));
+app.get('/health', (req, res) => {
+  res.json({
+    status: 'ok',
+    service: 'kitchen-api',
+    version: '1.1.0',
+    environment: process.env.NODE_ENV || 'development',
+    timestamp: new Date().toISOString(),
+    db: ordersCollection ? 'connected' : 'disconnected'
+  });
+});
 app.get('/ready', (req, res) => res.status(200).send('OK'));
 app.get('/metrics', async (req, res) => { res.set('Content-Type', register.contentType); res.end(await register.metrics()); });
 app.get('/orders', async (req, res) => { if (!ordersCollection) return res.status(503).json({ error: 'Database not connected' }); const orders = await ordersCollection.find({}).toArray(); res.json(orders); });
